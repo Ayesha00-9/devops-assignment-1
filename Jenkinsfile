@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        sonarQube 'SonarQube'
+        sonarScanner 'SonarScanner'
     }
 
     stages {
@@ -18,11 +18,11 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
-                    sonar-scanner \
-                      -Dsonar.projectKey=weather-advice-app \
-                      -Dsonar.projectName=weather-advice-app \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=http://sonarqube:9000
+                        sonar-scanner \
+                          -Dsonar.projectKey=weather-advice-app \
+                          -Dsonar.projectName=weather-advice-app \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=http://sonarqube:9000
                     '''
                 }
             }
