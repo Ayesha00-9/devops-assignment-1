@@ -17,13 +17,13 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip3 install --break-system-packages -r requirements.txt || echo "No requirements.txt"'
+                sh 'pip3 install --break-system-packages -r requirements.txt || true'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('sonarqube') {
+                withSonarQubeEnv('SonarQube') {
                     sh 'sonar-scanner -Dsonar.projectKey=${JOB_NAME} -Dsonar.projectName=${JOB_NAME} -Dsonar.sources=. -Dsonar.host.url=http://sonarqube:9000'
                 }
             }
