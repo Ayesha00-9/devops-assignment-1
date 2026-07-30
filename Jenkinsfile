@@ -1,28 +1,33 @@
-FROM jenkins/jenkins:lts
+pipeline {
+    agent any
 
-USER root
+    stages {
 
-RUN apt-get update && \
-    apt-get install -y \
-    docker.io \
-    wget \
-    unzip
+        stage('Checkout Code') {
+            steps {
+                git branch: 'feature/devops',
+                    url: 'https://github.com/Ayesha00-9/devops-assignment-1.git'
+            }
+        }
 
-# Install SonarScanner CLI
-RUN wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-7.1.0.4889-linux-x64.zip && \
-    unzip sonar-scanner-7.1.0.4889-linux-x64.zip -d /opt && \
-    mv /opt/sonar-scanner-* /opt/sonar-scanner && \
-    ln -s /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner && \
-    rm sonar-scanner-7.1.0.4889-linux-x64.zip
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        sonar-scanner \
+                          -Dsonar.projectKey=weather-advice-app \
+                          -Dsonar.projectName=weather-advice-app \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=$SONAR_HOST_URL
+                    '''
+                }
+            }
+        }
 
-USER jenkins
-
-RUN jenkins-plugin-cli --plugins \
-    git \
-    git-client \
-    workflow-aggregator \
-    workflow-job \
-    workflow-cps \
-    pipeline-stage-view \
-    docker-workflow \
-    sonar
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t weather-advice-app .'
+            }
+        }
+    }
+}
