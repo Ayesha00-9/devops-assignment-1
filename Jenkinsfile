@@ -21,16 +21,25 @@ pipeline {
             }
         }
 
+        stage('Run Tests with Coverage') {
+            steps {
+                sh 'coverage run -m pytest test_app.py -v'
+                sh 'coverage xml -o coverage-report.xml'
+                sh 'coverage report'
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    if (env.SONAR_TOKEN) {
-                        withSonarQubeEnv('SonarQube') {
-                            sh 'sonar-scanner -Dsonar.projectKey=${JOB_NAME} -Dsonar.projectName=${JOB_NAME} -Dsonar.sources=. -Dsonar.host.url=http://sonarqube:9000'
-                        }
-                    } else {
-                        echo 'Skipping SonarQube: SONAR_TOKEN not configured in Jenkins'
-                    }
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        sonar-scanner \
+                          -Dsonar.projectKey=${JOB_NAME} \
+                          -Dsonar.projectName=${JOB_NAME} \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=http://sonarqube:9000 \
+                          -Dsonar.python.coverage.reportPaths=coverage-report.xml
+                    '''
                 }
             }
         }
