@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         REPO_NAME = sh(
-            script: "echo ${env.GIT_URL} | sed -E 's/.*\\/([^/]+)(\\.git)?$/\\1/'",
+            script: "git remote get-url origin | xargs basename -s .git",
             returnStdout: true
         ).trim()
         SONAR_PROJECT_KEY = "${REPO_NAME}"
