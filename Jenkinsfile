@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "weather-advice-app"
+    }
+
     stages {
 
         stage('Checkout Code') {
@@ -15,10 +19,9 @@ pipeline {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
                         sonar-scanner \
-                          -Dsonar.projectKey=weather-advice-app \
-                          -Dsonar.projectName=weather-advice-app \
-                          -Dsonar.sources=. \
-                          -Dsonar.host.url=$SONAR_HOST_URL
+                        -Dsonar.projectKey=weather-advice-app \
+                        -Dsonar.projectName=weather-advice-app \
+                        -Dsonar.sources=.
                     '''
                 }
             }
@@ -26,8 +29,17 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t weather-advice-app .'
+                sh "docker build -t ${IMAGE_NAME}:latest ."
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline completed successfully."
+        }
+        failure {
+            echo "Pipeline failed."
         }
     }
 }
