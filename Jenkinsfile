@@ -2,7 +2,12 @@ pipeline {
     agent any
 
     environment {
-        SONAR_SCANNER = "sonar-scanner"
+        REPO_NAME = sh(
+            script: "echo ${env.GIT_URL} | sed -E 's/.*\\/([^/]+)(\\.git)?$/\\1/'",
+            returnStdout: true
+        ).trim()
+        SONAR_PROJECT_KEY = "${REPO_NAME}"
+        DOCKER_IMAGE = "${REPO_NAME}"
     }
 
     stages {
@@ -15,7 +20,13 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pip3 install --break-system-packages -r requirements.txt'
+                script {
+                    if (fileExists('requirements.txt')) {
+                        sh 'pip3 install --break-system-packages -r requirements.txt'
+                    } else {
+                        echo 'No requirements.txt found, skipping pip install'
+                    }
+                }
             }
         }
 
@@ -23,11 +34,11 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonarqube') {
                     sh '''
-                    sonar-scanner \
-                      -Dsonar.projectKey=DevOpsProject \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=http://sonarqube:9000 \
-                      -Dsonar.token=$SONAR_AUTH_TOKEN
+                        sonar-scanner \
+                          -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                          -Dsonar.projectName=${SONAR_PROJECT_KEY} \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=http://sonarqube:9000
                     '''
                 }
             }
@@ -42,7 +53,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t sample-app .'
+                sh "docker build -t ${DOCKER_IMAGE} ."
             }
         }
     }
@@ -51,11 +62,9 @@ pipeline {
         success {
             echo 'Pipeline Successful'
         }
-
         failure {
             echo 'Pipeline Failed'
         }
-
         always {
             cleanWs()
         }
