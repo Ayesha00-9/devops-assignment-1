@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:lts
+FROM jenkins/jenkins:latest
 
 USER root
 
@@ -12,10 +12,10 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Sonar Scanner
-RUN wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-7.3.0.5189-linux-x64.zip && \
-    unzip sonar-scanner-7.3.0.5189-linux-x64.zip -d /opt && \
+RUN wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-7.3.0.5189-linux-x64.zip && \
+    unzip sonar-scanner-cli-7.3.0.5189-linux-x64.zip -d /opt && \
     mv /opt/sonar-scanner-* /opt/sonar-scanner && \
-    rm sonar-scanner-7.3.0.5189-linux-x64.zip
+    rm sonar-scanner-cli-7.3.0.5189-linux-x64.zip
 
 # Add Sonar Scanner to PATH
 ENV PATH="/opt/sonar-scanner/bin:${PATH}"

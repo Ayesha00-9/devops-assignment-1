@@ -1,45 +1,40 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "weather-advice-app"
-    }
-
     stages {
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                git branch: 'feature/devops',
-                    url: 'https://github.com/Ayesha00-9/devops-assignment-1.git'
+                checkout scm
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('Code Analysis') {
             steps {
+                echo 'Running SonarQube Analysis...'
+
                 withSonarQubeEnv('SonarQube') {
-                    sh '''
-                        sonar-scanner \
-                        -Dsonar.projectKey=weather-advice-app \
-                        -Dsonar.projectName=weather-advice-app \
-                        -Dsonar.sources=.
-                    '''
+                    sh 'sonar-scanner'
                 }
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:latest ."
+                echo 'Building project...'
+
+                sh 'docker build -t my-app .'
             }
         }
     }
 
     post {
         success {
-            echo "Pipeline completed successfully."
+            echo 'Pipeline completed successfully.'
         }
+
         failure {
-            echo "Pipeline failed."
+            echo 'Pipeline failed.'
         }
     }
 }

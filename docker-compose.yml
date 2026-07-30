@@ -12,6 +12,14 @@ services:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
       - /usr/bin/docker:/usr/bin/docker
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/login || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      sonarqube:
+        condition: service_healthy
 
   sonarqube:
     image: sonarqube:community
@@ -20,6 +28,13 @@ services:
       - "9000:9000"
     volumes:
       - sonarqube_data:/opt/sonarqube/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/api/system/status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    environment:
+      - SONAR_EMBEDDED_DATABASE_TIMEOUT=120
 
 volumes:
   jenkins_home:
