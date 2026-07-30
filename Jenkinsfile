@@ -23,8 +23,14 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh 'sonar-scanner -Dsonar.projectKey=${JOB_NAME} -Dsonar.projectName=${JOB_NAME} -Dsonar.sources=. -Dsonar.host.url=http://sonarqube:9000'
+                script {
+                    if (env.SONAR_TOKEN) {
+                        withSonarQubeEnv('SonarQube') {
+                            sh 'sonar-scanner -Dsonar.projectKey=${JOB_NAME} -Dsonar.projectName=${JOB_NAME} -Dsonar.sources=. -Dsonar.host.url=http://sonarqube:9000'
+                        }
+                    } else {
+                        echo 'Skipping SonarQube: SONAR_TOKEN not configured in Jenkins'
+                    }
                 }
             }
         }
