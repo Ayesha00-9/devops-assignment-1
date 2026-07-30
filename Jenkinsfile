@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        sonarRunner 'SonarScanner'
-    }
-
     stages {
 
         stage('Checkout Code') {
@@ -22,8 +18,7 @@ pipeline {
                           -Dsonar.projectKey=weather-advice-app \
                           -Dsonar.projectName=weather-advice-app \
                           -Dsonar.sources=. \
-                          -Dsonar.host.url=$SONAR_HOST_URL \
-                          -Dsonar.token=$SONAR_AUTH_TOKEN
+                          -Dsonar.host.url=$SONAR_HOST_URL
                     '''
                 }
             }
