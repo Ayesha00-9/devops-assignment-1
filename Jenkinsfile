@@ -1,40 +1,63 @@
 pipeline {
     agent any
 
+    environment {
+        SONAR_SCANNER = "sonar-scanner"
+    }
+
     stages {
 
-        stage('Checkout') {
+        stage('Check Python') {
             steps {
-                checkout scm
+                sh 'python3 --version'
             }
         }
 
-        stage('Code Analysis') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Running SonarQube Analysis...'
+                sh 'pip3 install --break-system-packages -r requirements.txt'
+            }
+        }
 
-                withSonarQubeEnv('SonarQube') {
-                    sh 'sonar-scanner'
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh '''
+                    sonar-scanner \
+                      -Dsonar.projectKey=DevOpsProject \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=http://sonarqube:9000 \
+                      -Dsonar.token=$SONAR_AUTH_TOKEN
+                    '''
                 }
             }
         }
 
-        stage('Build') {
+        stage('Verify Workspace') {
             steps {
-                echo 'Building project...'
+                sh 'pwd'
+                sh 'ls -la'
+            }
+        }
 
-                sh 'docker build -t my-app .'
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t sample-app .'
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully.'
+            echo 'Pipeline Successful'
         }
 
         failure {
-            echo 'Pipeline failed.'
+            echo 'Pipeline Failed'
+        }
+
+        always {
+            cleanWs()
         }
     }
 }

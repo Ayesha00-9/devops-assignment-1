@@ -9,7 +9,8 @@ RUN apt-get update && \
     git \
     wget \
     unzip && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    usermod -aG docker jenkins
 
 # Install Sonar Scanner
 RUN wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-7.3.0.5189-linux-x64.zip && \
