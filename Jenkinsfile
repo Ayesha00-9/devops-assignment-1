@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        sonarScanner 'SonarScanner'
+        sonarRunner 'SonarScanner'
     }
 
     stages {
@@ -22,7 +22,8 @@ pipeline {
                           -Dsonar.projectKey=weather-advice-app \
                           -Dsonar.projectName=weather-advice-app \
                           -Dsonar.sources=. \
-                          -Dsonar.host.url=http://sonarqube:9000
+                          -Dsonar.host.url=$SONAR_HOST_URL \
+                          -Dsonar.token=$SONAR_AUTH_TOKEN
                     '''
                 }
             }
